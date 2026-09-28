@@ -1,0 +1,329 @@
+{
+  "entities": {
+    "User": {
+      "title": "Institutional User Profile",
+      "description": "Authorized institutional staff member within the dining facility or kitchen operations.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 256 },
+        "displayName": { "type": "string", "maxLength": 128 },
+        "photoURL": { "type": "string", "maxLength": 512 },
+        "role": { "type": "string", "enum": ["Institutional Director", "Kitchen Supervisor", "Culinary Operations Lead", "HACCP Safety Officer", "Inventory Manager"] },
+        "institutionName": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "MealHistory": {
+      "title": "Meal Consumption & Attendance Record",
+      "description": "Historical attendance, meals prepared, meals consumed, and surplus leftovers for regression forecasting.",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string", "maxLength": 32 },
+        "dayOfWeek": { "type": "string", "maxLength": 32 },
+        "mealSession": { "type": "string", "maxLength": 32 },
+        "attendanceCount": { "type": "number" },
+        "mealsServed": { "type": "number" },
+        "prepQuantity": { "type": "number" },
+        "leftoverMeals": { "type": "number" },
+        "leftoverKg": { "type": "number" },
+        "weather": { "type": "string", "maxLength": 128 },
+        "temperatureC": { "type": "number" },
+        "specialEventFactor": { "type": "number" },
+        "rainScenario": { "type": "boolean" },
+        "createdByUser": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["date", "mealSession", "attendanceCount", "mealsServed"]
+    },
+    "ForecastRun": {
+      "title": "Demand Forecast Model Output",
+      "description": "Persisted forecast run containing regression metrics, 7-day targets, and supervisory recommendations.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "generatedAt": { "type": "string", "format": "date-time" },
+        "targetStartDate": { "type": "string", "maxLength": 32 },
+        "forecastDays": { "type": "number" },
+        "modelType": { "type": "string", "maxLength": 64 },
+        "mae": { "type": "number" },
+        "mape": { "type": "number" },
+        "r2Score": { "type": "number" },
+        "totalPredictedDemand": { "type": "number" },
+        "totalRecommendedPrep": { "type": "number" },
+        "totalExpectedSurplus": { "type": "number" },
+        "status": { "type": "string", "maxLength": 32 },
+        "createdByUser": { "type": "string", "maxLength": 128 }
+      },
+      "required": ["id", "generatedAt", "modelType", "totalPredictedDemand"]
+    },
+    "InventoryItem": {
+      "title": "Inventory Raw Ingredient",
+      "description": "Raw material batch stored in campus pantry, chiller, or deep freeze with FEFO expiry tracking.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 160 },
+        "category": { "type": "string", "maxLength": 64 },
+        "quantity": { "type": "number" },
+        "unit": { "type": "string", "maxLength": 32 },
+        "currentStockKg": { "type": "number" },
+        "reorderLevelKg": { "type": "number" },
+        "cost": { "type": "number" },
+        "unitCost": { "type": "number" },
+        "purchaseDate": { "type": "string", "maxLength": 32 },
+        "receivedDate": { "type": "string", "maxLength": 32 },
+        "expiryDate": { "type": "string", "maxLength": 32 },
+        "storageLocation": { "type": "string", "maxLength": 128 },
+        "storageZone": { "type": "string", "maxLength": 128 },
+        "supplier": { "type": "string", "maxLength": 128 },
+        "batchCode": { "type": "string", "maxLength": 64 },
+        "shelfLifeStatus": { "type": "string", "enum": ["expired", "critical", "near-term", "safe"] },
+        "fefoRecommendation": { "type": "string", "maxLength": 256 },
+        "createdByUser": { "type": "string", "maxLength": 128 }
+      },
+      "required": ["name", "category", "currentStockKg", "storageZone"]
+    },
+    "WasteEntry": {
+      "title": "Kitchen Waste Log Entry",
+      "description": "Direct digital scale waste log entry recording discarded material stream, root cause, and station.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "foodItem": { "type": "string", "maxLength": 160 },
+        "itemName": { "type": "string", "maxLength": 160 },
+        "quantity": { "type": "number" },
+        "unit": { "type": "string", "maxLength": 32 },
+        "weightKg": { "type": "number" },
+        "category": { "type": "string", "maxLength": 64 },
+        "wasteStream": { "type": "string", "maxLength": 64 },
+        "date": { "type": "string", "maxLength": 32 },
+        "timestamp": { "type": "string", "maxLength": 64 },
+        "reason": { "type": "string", "maxLength": 256 },
+        "rootCause": { "type": "string", "maxLength": 64 },
+        "mealSession": { "type": "string", "maxLength": 32 },
+        "costLoss": { "type": "number" },
+        "kitchenStation": { "type": "string", "maxLength": 64 },
+        "loggedBy": { "type": "string", "maxLength": 128 },
+        "actionRecommended": { "type": "string", "maxLength": 256 },
+        "createdByUser": { "type": "string", "maxLength": 128 }
+      },
+      "required": ["itemName", "weightKg", "category", "loggedBy"]
+    },
+    "FoodListing": {
+      "title": "Surplus Food Listing Batch",
+      "description": "High-quality edible surplus food batch prepared and safe for redistribution with HACCP logs.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "batchNumber": { "type": "string", "maxLength": 64 },
+        "foodName": { "type": "string", "maxLength": 160 },
+        "dishName": { "type": "string", "maxLength": 160 },
+        "category": { "type": "string", "maxLength": 64 },
+        "quantity": { "type": "number" },
+        "unit": { "type": "string", "maxLength": 32 },
+        "portions": { "type": "number" },
+        "weightKg": { "type": "number" },
+        "preparationTime": { "type": "string", "maxLength": 64 },
+        "storageConditions": { "type": "string", "maxLength": 64 },
+        "collectionDeadline": { "type": "string", "maxLength": 64 },
+        "location": { "type": "string", "maxLength": 128 },
+        "qualityReviewStatus": { "type": "string", "maxLength": 64 },
+        "status": { "type": "string", "enum": ["Available", "Matched", "Pickup Scheduled", "Collected", "Delivered", "Cancelled", "Expired"] },
+        "redistributionStatus": { "type": "string", "maxLength": 32 },
+        "assignedRecipientId": { "type": "string", "maxLength": 128 },
+        "assignedRecipientName": { "type": "string", "maxLength": 160 },
+        "assignedQuantity": { "type": "number" },
+        "createdByUser": { "type": "string", "maxLength": 128 }
+      },
+      "required": ["foodName", "weightKg", "status", "qualityReviewStatus"]
+    },
+    "Recipient": {
+      "title": "Verified Community Welfare Partner",
+      "description": "Authorized partner recipient organization receiving surplus food donations.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 160 },
+        "type": { "type": "string", "maxLength": 64 },
+        "location": { "type": "string", "maxLength": 256 },
+        "serviceCapacity": { "type": "number" },
+        "typicalCapacityKg": { "type": "number" },
+        "operatingHours": { "type": "string", "maxLength": 128 },
+        "verificationStatus": { "type": "string", "maxLength": 64 },
+        "contactPerson": { "type": "string", "maxLength": 128 },
+        "phone": { "type": "string", "maxLength": 64 },
+        "pickupAvailability": { "type": "string", "maxLength": 64 },
+        "distanceKm": { "type": "number" },
+        "isActive": { "type": "boolean" },
+        "allocatedTodayKg": { "type": "number" },
+        "notes": { "type": "string", "maxLength": 512 }
+      },
+      "required": ["name", "type", "serviceCapacity", "verificationStatus"]
+    },
+    "RedistributionRecord": {
+      "title": "Redistribution Dispatch & Delivery Manifest",
+      "description": "Chain-of-custody transfer manifest and delivery confirmation with temperature logging.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "manifestCode": { "type": "string", "maxLength": 64 },
+        "dishSummary": { "type": "string", "maxLength": 256 },
+        "totalKg": { "type": "number" },
+        "destinationPartner": { "type": "string", "maxLength": 160 },
+        "destinationType": { "type": "string", "maxLength": 64 },
+        "transitCarrier": { "type": "string", "maxLength": 64 },
+        "dispatchTime": { "type": "string", "maxLength": 64 },
+        "estimatedArrival": { "type": "string", "maxLength": 64 },
+        "status": { "type": "string", "enum": ["Staged", "Vehicle Loading", "In-Transit", "Received & Verified"] },
+        "tempAtDispatch": { "type": "number" },
+        "authorizedOfficer": { "type": "string", "maxLength": 128 },
+        "deliveredAt": { "type": "string", "maxLength": 64 },
+        "receivingOfficer": { "type": "string", "maxLength": 128 },
+        "tempAtDelivery": { "type": "number" },
+        "deliveredKg": { "type": "number" },
+        "signatureVerificationCode": { "type": "string", "maxLength": 64 },
+        "createdByUser": { "type": "string", "maxLength": 128 }
+      },
+      "required": ["manifestCode", "totalKg", "destinationPartner", "status"]
+    },
+    "QualityCheck": {
+      "title": "Visual AI & Sensory Inspection Record",
+      "description": "Computer vision assessment and human supervisory HACCP sensory evaluation log.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "itemName": { "type": "string", "maxLength": 160 },
+        "batchCode": { "type": "string", "maxLength": 64 },
+        "category": { "type": "string", "maxLength": 64 },
+        "location": { "type": "string", "maxLength": 128 },
+        "storageCondition": { "type": "string", "maxLength": 64 },
+        "imageUrl": { "type": "string", "maxLength": 2048 },
+        "inspectionTimestamp": { "type": "string", "maxLength": 64 },
+        "inspectedBy": { "type": "string", "maxLength": 128 },
+        "reviewStatus": { "type": "string", "enum": ["Pending", "Reviewed", "Flagged", "Rejected"] },
+        "reviewedBy": { "type": "string", "maxLength": 128 },
+        "reviewerNotes": { "type": "string", "maxLength": 512 },
+        "reviewedAt": { "type": "string", "maxLength": 64 },
+        "aiConfidence": { "type": "number" },
+        "safetyDisclaimer": { "type": "string", "maxLength": 512 },
+        "createdByUser": { "type": "string", "maxLength": 128 }
+      },
+      "required": ["itemName", "inspectedBy", "reviewStatus"]
+    },
+    "SensorReading": {
+      "title": "IoT Cold Chain Telemetry Reading",
+      "description": "IoT sensor telemetry recording refrigerator/freezer temperature, humidity, and status.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "sensorId": { "type": "string", "maxLength": 64 },
+        "name": { "type": "string", "maxLength": 128 },
+        "location": { "type": "string", "maxLength": 128 },
+        "type": { "type": "string", "maxLength": 64 },
+        "currentValue": { "type": "number" },
+        "unit": { "type": "string", "maxLength": 16 },
+        "targetRange": { "type": "string", "maxLength": 64 },
+        "minSafe": { "type": "number" },
+        "maxSafe": { "type": "number" },
+        "status": { "type": "string", "enum": ["optimal", "warning", "critical"] },
+        "lastPing": { "type": "string", "maxLength": 64 },
+        "batteryPercent": { "type": "number" },
+        "calibratedBy": { "type": "string", "maxLength": 128 }
+      },
+      "required": ["sensorId", "name", "currentValue", "status"]
+    },
+    "ProcessingLog": {
+      "title": "Raw Material Loss & Equipment Log",
+      "description": "Processing line yield loss or kitchen machine operational downtime log.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "timestamp": { "type": "string", "maxLength": 64 },
+        "productionLine": { "type": "string", "maxLength": 64 },
+        "processStep": { "type": "string", "maxLength": 64 },
+        "ingredient": { "type": "string", "maxLength": 160 },
+        "inputWeightKg": { "type": "number" },
+        "lossKg": { "type": "number" },
+        "lossPercentage": { "type": "number" },
+        "equipmentUsed": { "type": "string", "maxLength": 128 },
+        "notes": { "type": "string", "maxLength": 512 },
+        "loggedBy": { "type": "string", "maxLength": 128 },
+        "createdByUser": { "type": "string", "maxLength": 128 }
+      },
+      "required": ["productionLine", "ingredient", "inputWeightKg", "lossKg"]
+    },
+    "ImpactMetric": {
+      "title": "Sustainability & Environmental Impact Snapshot",
+      "description": "Calculated ESG and food waste prevention scorecard with conversion factor lineage.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "date": { "type": "string", "maxLength": 32 },
+        "totalFoodWasteKg": { "type": "number" },
+        "foodRecoveredDeliveredKg": { "type": "number" },
+        "foodWastePreventedKg": { "type": "number" },
+        "estimatedCo2eAvoidedKg": { "type": "number" },
+        "estimatedWaterSavedLitres": { "type": "number" },
+        "estimatedCostSavings": { "type": "number" },
+        "mealsDivertedCount": { "type": "number" },
+        "landfillDiversionRate": { "type": "number" },
+        "baselineMethodology": { "type": "string", "maxLength": 256 },
+        "lastCalculatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "totalFoodWasteKg", "foodRecoveredDeliveredKg"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Institutional kitchen staff and supervisor accounts"
+    },
+    "/meal_history/{recordId}": {
+      "schema": "MealHistory",
+      "description": "Historical dining consumption and attendance logs for regression forecasting"
+    },
+    "/forecasts/{forecastId}": {
+      "schema": "ForecastRun",
+      "description": "Trained demand forecasting runs and supervisory prep targets"
+    },
+    "/inventory/{itemId}": {
+      "schema": "InventoryItem",
+      "description": "Store room raw ingredients, chiller items, and shelf life tracking"
+    },
+    "/waste_entries/{entryId}": {
+      "schema": "WasteEntry",
+      "description": "Direct measured food waste entries by station and root cause"
+    },
+    "/food_listings/{listingId}": {
+      "schema": "FoodListing",
+      "description": "Surplus food batches available or staged for redistribution"
+    },
+    "/recipients/{recipientId}": {
+      "schema": "Recipient",
+      "description": "Verified welfare partner organizations and pantries"
+    },
+    "/redistribution_records/{recordId}": {
+      "schema": "RedistributionRecord",
+      "description": "Chain-of-custody dispatch manifests and delivery confirmations"
+    },
+    "/quality_checks/{checkId}": {
+      "schema": "QualityCheck",
+      "description": "Quality inspection and visual AI audit records"
+    },
+    "/sensor_readings/{readingId}": {
+      "schema": "SensorReading",
+      "description": "Cold chain IoT telemetry and calibration readings"
+    },
+    "/processing_logs/{logId}": {
+      "schema": "ProcessingLog",
+      "description": "Raw material loss and equipment efficiency logs"
+    },
+    "/impact_metrics/{metricId}": {
+      "schema": "ImpactMetric",
+      "description": "Aggregated sustainability and environmental impact audits"
+    }
+  }
+}

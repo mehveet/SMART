@@ -1,0 +1,144 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Deny-by-default safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper Primitives
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isInstitutionalUser() {
+      return isSignedIn();
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'dsai.syedhanan@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // 1. Users collection
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isOwner(userId) && isValidId(userId);
+      allow update: if (isOwner(userId) || isAdmin()) && isValidId(userId);
+      allow delete: if isAdmin() && isValidId(userId);
+    }
+
+    // 2. Meal History
+    match /meal_history/{recordId} {
+      allow read: if isInstitutionalUser();
+      allow create: if isInstitutionalUser() && isValidId(recordId);
+      allow update: if isInstitutionalUser() && isValidId(recordId);
+      allow delete: if (isInstitutionalUser() || isAdmin()) && isValidId(recordId);
+    }
+
+    // 3. Forecasts
+    match /forecasts/{forecastId} {
+      allow read: if isInstitutionalUser();
+      allow create: if isInstitutionalUser() && isValidId(forecastId);
+      allow update: if isInstitutionalUser() && isValidId(forecastId);
+      allow delete: if (isInstitutionalUser() || isAdmin()) && isValidId(forecastId);
+    }
+
+    // 4. Inventory
+    match /inventory/{itemId} {
+      allow read: if isInstitutionalUser();
+      allow create: if isInstitutionalUser() && isValidId(itemId);
+      allow update: if isInstitutionalUser() && isValidId(itemId);
+      allow delete: if isInstitutionalUser() && isValidId(itemId);
+    }
+
+    // 5. Waste Entries
+    match /waste_entries/{entryId} {
+      allow read: if isInstitutionalUser();
+      allow create: if isInstitutionalUser() && isValidId(entryId);
+      allow update: if isInstitutionalUser() && isValidId(entryId);
+      allow delete: if isInstitutionalUser() && isValidId(entryId);
+    }
+
+    // 6. Food Listings (Surplus Batches)
+    match /food_listings/{listingId} {
+      allow read: if isInstitutionalUser();
+      allow create: if isInstitutionalUser() && isValidId(listingId);
+      allow update: if isInstitutionalUser() && isValidId(listingId);
+      allow delete: if isInstitutionalUser() && isValidId(listingId);
+    }
+
+    // 7. Recipients (Welfare Partners)
+    match /recipients/{recipientId} {
+      allow read: if isInstitutionalUser();
+      allow create: if isInstitutionalUser() && isValidId(recipientId);
+      allow update: if isInstitutionalUser() && isValidId(recipientId);
+      allow delete: if isInstitutionalUser() && isValidId(recipientId);
+    }
+
+    // 8. Redistribution Records (Dispatches & Manifests)
+    match /redistribution_records/{recordId} {
+      allow read: if isInstitutionalUser();
+      allow create: if isInstitutionalUser() && isValidId(recordId);
+      allow update: if isInstitutionalUser() && isValidId(recordId);
+      allow delete: if isInstitutionalUser() && isValidId(recordId);
+    }
+
+    // 9. Quality Checks
+    match /quality_checks/{checkId} {
+      allow read: if isInstitutionalUser();
+      allow create: if isInstitutionalUser() && isValidId(checkId);
+      allow update: if isInstitutionalUser() && isValidId(checkId);
+      allow delete: if isInstitutionalUser() && isValidId(checkId);
+    }
+
+    // 10. Sensor Readings
+    match /sensor_readings/{readingId} {
+      allow read: if isInstitutionalUser();
+      allow create: if isInstitutionalUser() && isValidId(readingId);
+      allow update: if isInstitutionalUser() && isValidId(readingId);
+      allow delete: if isInstitutionalUser() && isValidId(readingId);
+    }
+
+    // 11. Processing Logs
+    match /processing_logs/{logId} {
+      allow read: if isInstitutionalUser();
+      allow create: if isInstitutionalUser() && isValidId(logId);
+      allow update: if isInstitutionalUser() && isValidId(logId);
+      allow delete: if isInstitutionalUser() && isValidId(logId);
+    }
+
+    // 12. Impact Metrics
+    match /impact_metrics/{metricId} {
+      allow read: if isInstitutionalUser();
+      allow create: if isInstitutionalUser() && isValidId(metricId);
+      allow update: if isInstitutionalUser() && isValidId(metricId);
+      allow delete: if isInstitutionalUser() && isValidId(metricId);
+    }
+
+    // Connection test document
+    match /test/{docId} {
+      allow read, write: if true;
+    }
+  }
+}

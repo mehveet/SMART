@@ -1,0 +1,8 @@
+{
+  "name": "SMART (Surplus Management And Redistribution Technology)",
+  "description": "An institutional platform for intelligent food demand forecasting, waste management, and internal surplus redistribution tracking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
